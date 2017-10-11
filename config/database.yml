@@ -2,7 +2,16 @@ development:
   adapter: postgresql
   encoding: unicode
   host: localhost
-  database: tree_test
+  database: tree_test_development
+  pool: 5
+  username: tahi
+  password: tahi
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  database: tree_test_test
   pool: 5
   username: tahi
   password: tahi
