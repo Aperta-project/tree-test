@@ -97,3 +97,17 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+def random_tree(klass, n)
+  parent = klass.create
+  (n - 1).times do
+    node = klass.create
+    parent.children << node
+    case rand(3) # move up, move down, or stay at the same level
+    when 0
+      parent = parent.parent unless parent.parent.nil?
+    when 1
+      parent = node
+    end
+  end
+end
