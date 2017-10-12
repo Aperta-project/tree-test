@@ -110,4 +110,5 @@ def random_tree(klass, n)
       parent = node
     end
   end
+  parent.root
 end
