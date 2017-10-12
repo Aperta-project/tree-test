@@ -17,5 +17,14 @@ RSpec.describe AwesomeTree, type: :model do
     it "should create a random tree with #{n} entries" do
       expect { random_tree(AwesomeTree, n) }.to change { AwesomeTree.count }.by(n)
     end
+
+    it "should read the random tree quickly with #{n} entries" do
+      tree = random_tree(AwesomeTree, n)
+      Benchmark.bm do |reads|
+        reads.report("Read benchmarks for #{n} entries: AwesomeTree") do
+          tree.reload.self_and_descendants
+        end
+      end
+    end
   end
 end
