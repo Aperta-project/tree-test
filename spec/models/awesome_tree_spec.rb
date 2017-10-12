@@ -14,9 +14,7 @@ RSpec.describe AwesomeTree, type: :model do
   end
 
   [10, 100, 1000].each do |n|
-    it "should create a random tree with #{n} entries" do
-      expect { random_tree(AwesomeTree, n) }.to change { AwesomeTree.count }.by(n)
-    end
+    it_behaves_like :random_tree_benchmark_create, n
 
     it "should read the random tree quickly with #{n} entries" do
       tree = random_tree(AwesomeTree, n)
