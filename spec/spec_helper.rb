@@ -98,10 +98,11 @@ RSpec.configure do |config|
 =end
 end
 
-def random_tree(klass, n)
-  parent = klass.create
+def random_tree(klass, n, create: true)
+  method = create ? :create : :new
+  parent = klass.send(method)
   (n - 1).times do
-    node = klass.create
+    node = klass.send(method)
     parent.children << node
     case rand(3) # move up, move down, or stay at the same level
     when 0
