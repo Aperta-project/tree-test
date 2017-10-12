@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171011224511) do
+ActiveRecord::Schema.define(version: 20171012131717) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,5 +32,21 @@ ActiveRecord::Schema.define(version: 20171011224511) do
   end
 
   add_index "awesome_trees", ["parent_id"], name: "index_awesome_trees_on_parent_id", using: :btree
+
+  create_table "closure_testing_tree_hierarchies", id: false, force: :cascade do |t|
+    t.integer "ancestor_id",   null: false
+    t.integer "descendant_id", null: false
+    t.integer "generations",   null: false
+  end
+
+  add_index "closure_testing_tree_hierarchies", ["ancestor_id", "descendant_id", "generations"], name: "closure_testing_tree_anc_desc_idx", unique: true, using: :btree
+  add_index "closure_testing_tree_hierarchies", ["descendant_id"], name: "closure_testing_tree_desc_idx", using: :btree
+
+  create_table "closure_testing_trees", force: :cascade do |t|
+    t.integer  "parent_id"
+    t.integer  "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
 end
