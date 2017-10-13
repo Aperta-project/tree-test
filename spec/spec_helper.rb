@@ -132,5 +132,11 @@ RSpec.shared_examples :random_tree_benchmark_piecemeal do |n|
     expect { random_tree(described_class, n) }.to change { described_class.count }.by(n)
   end
 end
+
+RSpec.shared_examples :random_tree_benchmark_batch do |n|
+  it "#{described_class} batch create #{n}-node tree", benchmark: true do
+    tree = nil
+    expect { tree = random_tree(described_class, n, create: false) }.not_to(change { described_class.count })
+    expect { tree.save! }.to change { described_class.count }.by(n)
   end
 end
