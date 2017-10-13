@@ -154,11 +154,24 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
   end
 end
 
+RSpec.shared_examples :random_tree_recurse do |n|
+  let!(:tree) { random_tree(described_class, n, 1, create: false).tap(&:save!) }
+
+  it "#{described_class} naively walks a #{n}-node tree", benchmark: true do
+    def walk(node)
+      node.id.zero? # do something useless
+      node.children.each { |child| walk(child) }
+    end
+    walk(tree)
+  end
+end
+
 RSpec.shared_examples :tree_benchmarks do
   [10, 100, 1000].each do |node_count|
     tree_count = 10_000 / node_count
     it_behaves_like :random_tree_benchmark_piecemeal, node_count, tree_count
     it_behaves_like :random_tree_benchmark_batch, node_count, tree_count
     it_behaves_like :random_tree_benchmark_read, node_count
+    it_behaves_like :random_tree_recurse, node_count
   end
 end
