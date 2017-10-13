@@ -140,3 +140,11 @@ RSpec.shared_examples :random_tree_benchmark_batch do |n|
     expect { tree.save! }.to change { described_class.count }.by(n)
   end
 end
+
+RSpec.shared_examples :random_tree_benchmark_read do |n|
+  let!(:tree) { random_tree(described_class, n, create: false) }
+
+  it "#{described_class} read #{n}-node tree", benchmark: true do
+    tree.reload.self_and_descendants
+  end
+end

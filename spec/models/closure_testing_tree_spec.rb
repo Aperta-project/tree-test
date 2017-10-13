@@ -16,10 +16,6 @@ RSpec.describe ClosureTestingTree, type: :model do
   [10, 100, 1000].each do |n|
     it_behaves_like :random_tree_benchmark_piecemeal, n
     it_behaves_like :random_tree_benchmark_batch, n
-
-    it "should read the random tree quickly with #{n} entries" do
-      tree = random_tree(ClosureTestingTree, n)
-      tree.reload.self_and_descendants
-    end
+    it_behaves_like :random_tree_benchmark_read, n
   end
 end
