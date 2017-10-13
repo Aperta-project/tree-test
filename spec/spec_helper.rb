@@ -54,6 +54,15 @@ RSpec.configure do |config|
     print ' '*LABEL_WIDTH + Benchmark::CAPTION
   end
 
+  config.around(:each, benchmark_queries: true) do |example|
+    counter = DBQueryMatchers::QueryCounter.new
+    ActiveSupport::Notifications.subscribed(counter.to_proc, 'sql.active_record') do
+      example.run
+    end
+    $stdout.write("#{example.description} queries".ljust(LABEL_WIDTH + 3))
+    puts counter.count
+  end
+
   config.around(:each, benchmark: true) do |example|
     Benchmark.benchmark('', LABEL_WIDTH) do |bm|
       bm.report(example.description) do #"#{example.class.description} #{example.description}") do
