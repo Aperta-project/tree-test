@@ -113,7 +113,8 @@ end
 
 def random_tree(klass, n, tree_id, create: true)
   method = create ? :create : :new
-  parent = klass.send(method, tree_id: tree_id)
+  root = klass.send(method, tree_id: tree_id)
+  parent = root
   (n - 1).times do
     node = klass.send(method)
     parent.children << node
@@ -124,7 +125,7 @@ def random_tree(klass, n, tree_id, create: true)
       parent = node
     end
   end
-  parent.root
+  root
 end
 
 RSpec.shared_examples :random_tree_benchmark_piecemeal do |tree_count, node_count|
