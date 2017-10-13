@@ -127,8 +127,7 @@ def random_tree(klass, n, create: true)
   parent.root
 end
 
-
-RSpec.shared_examples :random_tree_benchmark_create do |n|
+RSpec.shared_examples :random_tree_benchmark_piecemeal do |n|
   it "#{described_class} piecemeal create #{n}-node tree", benchmark: true do
     expect { random_tree(described_class, n) }.to change { described_class.count }.by(n)
   end

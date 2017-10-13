@@ -14,7 +14,7 @@ RSpec.describe ClosureTestingTree, type: :model do
   end
 
   [10, 100, 1000].each do |n|
-    it_behaves_like :random_tree_benchmark_create, n
+    it_behaves_like :random_tree_benchmark_piecemeal, n
 
     it "should create a random tree with #{n} entries" do
       expect { random_tree(ClosureTestingTree, n) }.to change { ClosureTestingTree.count }.by(n)

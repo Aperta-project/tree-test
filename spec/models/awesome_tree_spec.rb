@@ -14,7 +14,7 @@ RSpec.describe AwesomeTree, type: :model do
   end
 
   [10, 100, 1000].each do |n|
-    it_behaves_like :random_tree_benchmark_create, n
+    it_behaves_like :random_tree_benchmark_piecemeal, n
 
     it "should read the random tree quickly with #{n} entries" do
       tree = random_tree(AwesomeTree, n)
