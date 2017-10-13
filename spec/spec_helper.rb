@@ -147,7 +147,7 @@ RSpec.shared_examples :random_tree_benchmark_batch do |tree_count, node_count|
 end
 
 RSpec.shared_examples :random_tree_benchmark_read do |n|
-  let!(:tree) { random_tree(described_class, n, 1, create: false) }
+  let!(:tree) { random_tree(described_class, n, 1, create: false).tap(&:save!) }
 
   it "#{described_class} read #{n}-node tree", benchmark: true do
     tree.reload.self_and_descendants
