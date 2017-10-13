@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171012131717) do
+ActiveRecord::Schema.define(version: 20171013164030) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,7 +21,10 @@ ActiveRecord::Schema.define(version: 20171012131717) do
     t.integer  "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "tree_id"
   end
+
+  add_index "acts_trees", ["tree_id"], name: "index_acts_trees_on_tree_id", using: :btree
 
   create_table "awesome_trees", force: :cascade do |t|
     t.integer  "lft"
@@ -29,9 +32,11 @@ ActiveRecord::Schema.define(version: 20171012131717) do
     t.integer  "parent_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "tree_id"
   end
 
   add_index "awesome_trees", ["parent_id"], name: "index_awesome_trees_on_parent_id", using: :btree
+  add_index "awesome_trees", ["tree_id"], name: "index_awesome_trees_on_tree_id", using: :btree
 
   create_table "closure_testing_tree_hierarchies", id: false, force: :cascade do |t|
     t.integer "ancestor_id",   null: false
@@ -47,6 +52,9 @@ ActiveRecord::Schema.define(version: 20171012131717) do
     t.integer  "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "tree_id"
   end
+
+  add_index "closure_testing_trees", ["tree_id"], name: "index_closure_testing_trees_on_tree_id", using: :btree
 
 end

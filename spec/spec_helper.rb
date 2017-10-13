@@ -111,9 +111,9 @@ RSpec.configure do |config|
 =end
 end
 
-def random_tree(klass, n, create: true)
+def random_tree(klass, n, tree_id, create: true)
   method = create ? :create : :new
-  parent = klass.send(method)
+  parent = klass.send(method, tree_id: tree_id)
   (n - 1).times do
     node = klass.send(method)
     parent.children << node
@@ -127,24 +127,37 @@ def random_tree(klass, n, create: true)
   parent.root
 end
 
-RSpec.shared_examples :random_tree_benchmark_piecemeal do |n|
-  it "#{described_class} piecemeal create #{n}-node tree", benchmark: true do
-    expect { random_tree(described_class, n) }.to change { described_class.count }.by(n)
+RSpec.shared_examples :random_tree_benchmark_piecemeal do |tree_count, node_count|
+  it "#{described_class} piecemeal create #{tree_count} trees with #{node_count} nodes", benchmark: true do
+    (1..tree_count).each do |tree_id|
+      expect { random_tree(described_class, node_count, tree_id) }.to change { described_class.count }.by(node_count)
+    end
   end
 end
 
-RSpec.shared_examples :random_tree_benchmark_batch do |n|
-  it "#{described_class} batch create #{n}-node tree", benchmark: true do
-    tree = nil
-    expect { tree = random_tree(described_class, n, create: false) }.not_to(change { described_class.count })
-    expect { tree.save! }.to change { described_class.count }.by(n)
+RSpec.shared_examples :random_tree_benchmark_batch do |tree_count, node_count|
+  it "#{described_class} batch create #{tree_count} trees with #{node_count} nodes", benchmark: true do
+    (1..tree_count).each do |tree_id|
+      tree = nil
+      expect { tree = random_tree(described_class, node_count, tree_id, create: false) }.not_to(change { described_class.count })
+      expect { tree.save! }.to change { described_class.count }.by(node_count)
+    end
   end
 end
 
 RSpec.shared_examples :random_tree_benchmark_read do |n|
-  let!(:tree) { random_tree(described_class, n, create: false) }
+  let!(:tree) { random_tree(described_class, n, 1, create: false) }
 
   it "#{described_class} read #{n}-node tree", benchmark: true do
     tree.reload.self_and_descendants
+  end
+end
+
+RSpec.shared_examples :tree_benchmarks do
+  [10, 100, 1000].each do |node_count|
+    tree_count = 10_000 / node_count
+    it_behaves_like :random_tree_benchmark_piecemeal, node_count, tree_count
+    it_behaves_like :random_tree_benchmark_batch, node_count, tree_count
+    it_behaves_like :random_tree_benchmark_read, node_count
   end
 end

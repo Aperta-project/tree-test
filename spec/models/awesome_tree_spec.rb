@@ -13,9 +13,5 @@ RSpec.describe AwesomeTree, type: :model do
     expect { child3.children << child4 }.to make_database_queries(count: 8)
   end
 
-  [10, 100, 1000].each do |n|
-    it_behaves_like :random_tree_benchmark_piecemeal, n
-    it_behaves_like :random_tree_benchmark_batch, n
-    it_behaves_like :random_tree_benchmark_read, n
-  end
+  it_behaves_like :tree_benchmarks
 end
