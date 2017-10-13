@@ -156,22 +156,45 @@ RSpec.shared_examples :random_tree_benchmark_batch do |tree_count, node_count|
 end
 
 RSpec.shared_examples :random_tree_benchmark_read do |n|
-  let!(:tree) { random_tree(described_class, n, 1, create: false).tap(&:save!) }
-
-  it "#{described_class} read #{n}-node tree", benchmark: true do
-    tree.reload.self_and_descendants
+  def walk(node)
+    expect { node.id.zero? }.not_to make_database_queries # do something useless
+    children = nil
+    expect { children = node.children.to_a }.to make_database_queries
+    children.each { |child| walk(child) }
   end
-end
 
-RSpec.shared_examples :random_tree_recurse do |n|
-  let!(:tree) { random_tree(described_class, n, 1, create: false).tap(&:save!) }
+  before :all do
+    @tree_id = random_tree(described_class, n, 1, create: false).tap(&:save!).id
+  end
 
-  it "#{described_class} naively walks a #{n}-node tree", benchmark: true do
-    def walk(node)
-      node.id.zero? # do something useless
-      node.children.each { |child| walk(child) }
-    end
-    walk(tree)
+  after :all do
+    described_class.find(@tree_id).destroy!
+  end
+
+  before :each do
+    # Clear SQL cache
+    ActiveRecord::Base.clear_all_connections!
+    # Load the column information
+    described_class.column_names
+    # No-op to initialize connection
+    ActiveRecord::Base.connection.execute('SELECT 1=1;')
+  end
+
+  let(:root) { described_class.find(@tree_id) }
+
+  it "#{described_class} read #{n}-node tree", benchmark: true, benchmark_queries: true do
+    expect { root.self_and_descendants }.to make_database_queries(count: 2..3)
+  end
+
+  it "#{described_class} naively walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
+    expect { walk(root) }.to make_database_queries
+  end
+
+  it "#{described_class} loads & walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
+    expect do
+      root.try(:root_node_including_tree) # only works on closure tree
+      walk(root)
+    end.to make_database_queries
   end
 end
 
@@ -181,6 +204,5 @@ RSpec.shared_examples :tree_benchmarks do
     it_behaves_like :random_tree_benchmark_piecemeal, node_count, tree_count
     it_behaves_like :random_tree_benchmark_batch, node_count, tree_count
     it_behaves_like :random_tree_benchmark_read, node_count
-    it_behaves_like :random_tree_recurse, node_count
   end
 end
