@@ -160,7 +160,7 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
     expect { node.id.zero? }.not_to make_database_queries # do something useless
     children = nil
     expect { children = node.children.to_a }.to make_database_queries
-    children.each { |child| walk(child) }
+    1 + children.map { |child| walk(child) }.inject(0, :+)
   end
 
   before :all do
@@ -183,7 +183,7 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
   let(:root) { described_class.find(@tree_id) }
 
   it "#{described_class} read #{n}-node tree", benchmark: true, benchmark_queries: true do
-    expect { root.self_and_descendants }.to make_database_queries(count: 2..3)
+    expect { root.self_and_descendants }.to make_database_queries(count: 2..13)
   end
 
   it "#{described_class} naively walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
@@ -193,7 +193,7 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
   it "#{described_class} loads & walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
     expect do
       root.try(:root_node_including_tree) # only works on closure tree
-      walk(root)
+      expect(walk(root)).to eq(n)
     end.to make_database_queries
   end
 end
