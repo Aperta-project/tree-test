@@ -183,7 +183,7 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
   let(:root) { described_class.find(@tree_id) }
 
   it "#{described_class} read #{n}-node tree", benchmark: true, benchmark_queries: true do
-    expect { root.self_and_descendants }.to make_database_queries(count: 2..13)
+    expect { root.self_and_descendants }.to make_database_queries
   end
 
   it "#{described_class} naively walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
