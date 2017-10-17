@@ -157,14 +157,8 @@ end
 
 RSpec.shared_examples :random_tree_benchmark_read do |n|
   def walk(node, loaded = false)
-    expect { node.id.zero? }.not_to make_database_queries # do something useless
-    children = nil
-    if loaded
-      expect { children = node.children.to_a }.not_to make_database_queries
-    else
-      expect { children = node.children.to_a }.to make_database_queries
-    end
-    1 + children.map { |child| walk(child, loaded) }.inject(0, :+)
+    node.id.zero? # do something useless
+    1 + node.children.to_a.map { |child| walk(child, loaded) }.inject(0, :+)
   end
 
   before :all do
@@ -197,11 +191,12 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
     expect { walk(root) }.to make_database_queries
   end
 
-  it "#{described_class} loads & walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
-    expect do
-      root.try(:root_node_including_tree) # only works on closure tree
-      expect(walk(root)).to eq(n)
-    end.to make_database_queries
+  if described_class == ClosureTestingTree # only works on closure tree
+    it "#{described_class} efficiently walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
+      expect do
+        expect(walk(root.root_tree_including_tree, true)).to eq(n)
+      end.to make_database_queries
+    end
   end
 end
 
