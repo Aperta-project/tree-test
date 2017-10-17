@@ -156,11 +156,15 @@ RSpec.shared_examples :random_tree_benchmark_batch do |tree_count, node_count|
 end
 
 RSpec.shared_examples :random_tree_benchmark_read do |n|
-  def walk(node)
+  def walk(node, loaded = false)
     expect { node.id.zero? }.not_to make_database_queries # do something useless
     children = nil
-    expect { children = node.children.to_a }.to make_database_queries
-    1 + children.map { |child| walk(child) }.inject(0, :+)
+    if loaded
+      expect { children = node.children.to_a }.not_to make_database_queries
+    else
+      expect { children = node.children.to_a }.to make_database_queries
+    end
+    1 + children.map { |child| walk(child, loaded) }.inject(0, :+)
   end
 
   before :all do
@@ -183,7 +187,10 @@ RSpec.shared_examples :random_tree_benchmark_read do |n|
   let(:root) { described_class.find(@tree_id) }
 
   it "#{described_class} read #{n}-node tree", benchmark: true, benchmark_queries: true do
-    expect { root.self_and_descendants }.to make_database_queries
+    expect do
+      # Use .to_a.size to force loading, not running COUNT() query
+      expect(root.self_and_descendants.to_a.size).to eq(n)
+    end.to make_database_queries
   end
 
   it "#{described_class} naively walks a #{n}-node tree", benchmark: true, benchmark_queries: true do
